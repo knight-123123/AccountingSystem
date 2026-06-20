@@ -185,6 +185,11 @@ export const api = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+  updateTransaction: (transactionId: number, payload: TransactionPayload) =>
+    requestJson<Transaction>(`/transactions/${transactionId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
   deleteTransaction: (transactionId: number) =>
     requestNoContent(`/transactions/${transactionId}`, {
       method: "DELETE",

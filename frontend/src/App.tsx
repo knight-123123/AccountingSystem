@@ -102,6 +102,7 @@ function App() {
   const [editingAccountId, setEditingAccountId] = useState<number | null>(null);
   const [categoryForm, setCategoryForm] = useState<CategoryFormState>(initialCategoryForm);
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
+  const [editingTransactionId, setEditingTransactionId] = useState<number | null>(null);
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -218,10 +219,17 @@ function App() {
           : { account_id: Number(form.account_id) }),
       };
 
-      await api.createTransaction(payload);
+      if (editingTransactionId === null) {
+        await api.createTransaction(payload);
+        setMessage("交易已保存");
+      } else {
+        await api.updateTransaction(editingTransactionId, payload);
+        setMessage("交易已更新");
+      }
+
       setForm({ ...initialForm, occurred_on: form.occurred_on, kind: form.kind });
+      setEditingTransactionId(null);
       await loadData();
-      setMessage("交易已保存");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "保存失败");
     } finally {
@@ -366,6 +374,31 @@ function App() {
     }
   }
 
+  function editTransaction(transaction: Transaction) {
+    const entries = [...transaction.entries].sort((left, right) =>
+      Number(left.amount) - Number(right.amount),
+    );
+    const firstEntry = entries[0];
+    const secondEntry = entries[1];
+    const amount = Math.abs(Number(firstEntry?.amount ?? "0")).toFixed(2);
+
+    setEditingTransactionId(transaction.id);
+    setForm({
+      kind: transaction.kind,
+      amount,
+      occurred_on: transaction.occurred_on,
+      account_id: transaction.kind === "transfer" ? "" : String(firstEntry?.account_id ?? ""),
+      from_account_id:
+        transaction.kind === "transfer" ? String(firstEntry?.account_id ?? "") : "",
+      to_account_id:
+        transaction.kind === "transfer" ? String(secondEntry?.account_id ?? "") : "",
+      category_id: transaction.category_id ? String(transaction.category_id) : "",
+      merchant: transaction.merchant ?? "",
+      note: transaction.note ?? "",
+    });
+    setMessage("正在编辑交易");
+  }
+
   return (
     <main className="app-shell">
       <section className="topbar">
@@ -383,7 +416,19 @@ function App() {
       <section className="grid two-columns">
         <form className="panel" onSubmit={submitTransaction}>
           <div className="panel-header">
-            <h2>新增交易</h2>
+            <h2>{editingTransactionId === null ? "新增交易" : "编辑交易"}</h2>
+            {editingTransactionId !== null ? (
+              <button
+                className="text-button"
+                type="button"
+                onClick={() => {
+                  setEditingTransactionId(null);
+                  setForm(initialForm);
+                }}
+              >
+                取消编辑
+              </button>
+            ) : null}
           </div>
 
           <div className="segmented">
@@ -504,7 +549,7 @@ function App() {
           </label>
 
           <button className="button primary" disabled={loading} type="submit">
-            {loading ? "保存中" : "保存交易"}
+            {loading ? "保存中" : editingTransactionId === null ? "保存交易" : "更新交易"}
           </button>
         </form>
 
@@ -795,6 +840,14 @@ function App() {
                         {formatMoney(entry.amount)}
                       </td>
                       <td>
+                        <button
+                          className="link-action"
+                          disabled={loading}
+                          type="button"
+                          onClick={() => editTransaction(transaction)}
+                        >
+                          编辑
+                        </button>
                         <button
                           className="link-action danger"
                           disabled={loading}

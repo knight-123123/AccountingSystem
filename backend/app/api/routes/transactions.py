@@ -114,6 +114,39 @@ def get_transaction(transaction_id: int, db: Session = Depends(get_db)) -> Trans
     return get_transaction_or_404(transaction_id, db)
 
 
+@router.patch("/{transaction_id}", response_model=TransactionRead)
+def update_transaction(
+    transaction_id: int,
+    payload: TransactionCreate,
+    db: Session = Depends(get_db),
+) -> Transaction:
+    transaction = get_transaction_or_404(transaction_id, db)
+    validate_transaction_refs(payload, db)
+
+    transaction.user_id = payload.user_id
+    transaction.kind = payload.kind
+    transaction.category_id = payload.category_id
+    transaction.occurred_on = payload.occurred_on
+    transaction.merchant = payload.merchant
+    transaction.note = payload.note
+
+    for entry in list(transaction.entries):
+        db.delete(entry)
+    db.flush()
+    transaction.entries = build_entries(payload)
+
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid transaction data.",
+        ) from exc
+
+    return get_transaction_or_404(transaction.id, db)
+
+
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_transaction(transaction_id: int, db: Session = Depends(get_db)) -> None:
     transaction = get_transaction_or_404(transaction_id, db)

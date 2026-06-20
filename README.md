@@ -177,6 +177,7 @@ DELETE /categories/{category_id}
 GET  /transactions
 POST /transactions
 GET  /transactions/{transaction_id}
+PATCH /transactions/{transaction_id}
 DELETE /transactions/{transaction_id}
 GET  /transactions/export.csv
 ```
@@ -193,6 +194,7 @@ GET /reports/categories
 
 - `DELETE /accounts/{account_id}` 和 `DELETE /categories/{category_id}` 当前是软删除，只修改 `is_active=false`。
 - `POST /transactions` 支持 `income`、`expense`、`transfer`。
+- `PATCH /transactions/{transaction_id}` 会用完整交易表单更新原交易并重建交易明细。
 - `GET /transactions` 支持 `start_date`、`end_date`、`kind`、`account_id`、`category_id` 查询参数。
 - `DELETE /transactions/{transaction_id}` 会删除整笔交易和对应交易明细。
 - CSV 导出是一条 `transaction_entry` 一行，转账会导出两行。
