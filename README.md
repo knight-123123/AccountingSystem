@@ -61,6 +61,21 @@ cd backend
 GET http://127.0.0.1:8000/health
 ```
 
+## 冒烟验证
+
+后端启动后，可以运行一次基础 API 冒烟验证：
+
+```powershell
+cd backend
+& "C:\Users\zzy\anaconda3\Scripts\conda.exe" run -n accounting-system python scripts\smoke_test_api.py
+```
+
+如需验证其他地址：
+
+```powershell
+& "C:\Users\zzy\anaconda3\Scripts\conda.exe" run -n accounting-system python scripts\smoke_test_api.py --base-url http://127.0.0.1:8000
+```
+
 ## 数据库迁移
 
 当前初始 migration 已创建并执行过。
@@ -142,7 +157,6 @@ GET /reports/categories
 
 ## 后续阶段
 
-1. 整理基础测试
-2. 根据需要补充交易修改/删除
-3. 再开始 React + Vite 前端
-4. Docker 化并部署到 Debian
+1. 根据需要补充交易修改/删除
+2. 再开始 React + Vite 前端
+3. Docker 化并部署到 Debian

@@ -54,6 +54,16 @@ http://127.0.0.1:8000/health
 {"status":"ok"}
 ```
 
+## 冒烟验证
+
+服务启动后运行：
+
+```powershell
+& "C:\Users\zzy\anaconda3\Scripts\conda.exe" run -n accounting-system python scripts\smoke_test_api.py
+```
+
+这个脚本只请求基础 GET 接口和 CSV 导出，不写入数据库。
+
 ## Alembic
 
 当前已有初始建表 migration。
