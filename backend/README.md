@@ -119,4 +119,4 @@ GET /reports/monthly
 GET /reports/categories
 ```
 
-交易创建支持 `income`、`expense`、`transfer`。删除交易会同时删除对应交易明细。CSV 导出是一条交易明细一行，转账会导出两行。
+交易创建支持 `income`、`expense`、`transfer`。交易列表支持 `start_date`、`end_date`、`kind`、`account_id`、`category_id` 查询参数。删除交易会同时删除对应交易明细。CSV 导出是一条交易明细一行，转账会导出两行。

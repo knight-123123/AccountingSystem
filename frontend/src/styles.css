@@ -222,6 +222,29 @@ select:focus {
   overflow-x: auto;
 }
 
+.filter-bar {
+  align-items: end;
+  border-bottom: 1px solid #edf1f3;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(120px, 1fr)) auto;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+}
+
+.filter-bar label {
+  margin-top: 0;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-actions .button {
+  white-space: nowrap;
+}
+
 table {
   border-collapse: collapse;
   min-width: 620px;
@@ -346,6 +369,10 @@ th {
 
   .two-columns,
   .inline-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-bar {
     grid-template-columns: 1fr;
   }
 

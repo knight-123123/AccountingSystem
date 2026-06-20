@@ -1,4 +1,5 @@
 import csv
+from datetime import date
 from decimal import Decimal
 from io import StringIO
 
@@ -18,12 +19,17 @@ router = APIRouter(prefix="/transactions", tags=["transactions"])
 
 
 @router.get("", response_model=list[TransactionRead])
-def list_transactions(db: Session = Depends(get_db)) -> list[Transaction]:
-    stmt = (
-        select(Transaction)
-        .options(selectinload(Transaction.entries))
-        .order_by(Transaction.occurred_on.desc(), Transaction.id.desc())
-    )
+def list_transactions(
+    start_date: date | None = None,
+    end_date: date | None = None,
+    kind: str | None = None,
+    account_id: int | None = None,
+    category_id: int | None = None,
+    db: Session = Depends(get_db),
+) -> list[Transaction]:
+    stmt = select(Transaction).options(selectinload(Transaction.entries))
+    stmt = apply_transaction_filters(stmt, start_date, end_date, kind, account_id, category_id)
+    stmt = stmt.order_by(Transaction.occurred_on.desc(), Transaction.id.desc())
     return list(db.scalars(stmt).all())
 
 
@@ -196,3 +202,24 @@ def get_transaction_or_404(transaction_id: int, db: Session) -> Transaction:
             detail="Transaction not found.",
         )
     return transaction
+
+
+def apply_transaction_filters(
+    stmt,
+    start_date: date | None,
+    end_date: date | None,
+    kind: str | None,
+    account_id: int | None,
+    category_id: int | None,
+):
+    if start_date is not None:
+        stmt = stmt.where(Transaction.occurred_on >= start_date)
+    if end_date is not None:
+        stmt = stmt.where(Transaction.occurred_on <= end_date)
+    if kind:
+        stmt = stmt.where(Transaction.kind == kind)
+    if category_id is not None:
+        stmt = stmt.where(Transaction.category_id == category_id)
+    if account_id is not None:
+        stmt = stmt.join(TransactionEntry).where(TransactionEntry.account_id == account_id)
+    return stmt

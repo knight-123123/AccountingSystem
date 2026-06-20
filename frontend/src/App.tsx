@@ -8,6 +8,7 @@ import {
   CategoryReport,
   MonthlyReport,
   Transaction,
+  TransactionFilters,
   TransactionPayload,
 } from "./api";
 
@@ -65,6 +66,22 @@ const initialCategoryForm: CategoryFormState = {
   sort_order: "0",
 };
 
+type FilterState = {
+  start_date: string;
+  end_date: string;
+  kind: string;
+  account_id: string;
+  category_id: string;
+};
+
+const initialFilters: FilterState = {
+  start_date: "",
+  end_date: "",
+  kind: "",
+  account_id: "",
+  category_id: "",
+};
+
 function formatMoney(value: string) {
   return Number(value).toLocaleString("zh-CN", {
     minimumFractionDigits: 2,
@@ -85,6 +102,7 @@ function App() {
   const [editingAccountId, setEditingAccountId] = useState<number | null>(null);
   const [categoryForm, setCategoryForm] = useState<CategoryFormState>(initialCategoryForm);
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
+  const [filters, setFilters] = useState<FilterState>(initialFilters);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -97,7 +115,7 @@ function App() {
     [categories],
   );
 
-  async function loadData() {
+  async function loadData(nextFilters: TransactionFilters = filters) {
     const [
       health,
       nextAccounts,
@@ -110,7 +128,7 @@ function App() {
       api.health(),
       api.accounts(),
       api.categories(),
-      api.transactions(),
+      api.transactions(nextFilters),
       api.accountReports(),
       api.monthlyReports(),
       api.categoryReports(),
@@ -142,6 +160,38 @@ function App() {
 
   function updateCategoryForm(field: keyof CategoryFormState, value: string) {
     setCategoryForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function updateFilters(field: keyof FilterState, value: string) {
+    setFilters((current) => ({ ...current, [field]: value }));
+  }
+
+  async function applyFilters(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setMessage("");
+    try {
+      await loadData(filters);
+      setMessage("交易筛选已应用");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "交易筛选失败");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function clearFilters() {
+    setLoading(true);
+    setMessage("");
+    try {
+      setFilters(initialFilters);
+      await loadData(initialFilters);
+      setMessage("交易筛选已清除");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "交易筛选失败");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function submitTransaction(event: FormEvent<HTMLFormElement>) {
@@ -654,6 +704,69 @@ function App() {
           <div className="panel-header">
             <h2>交易流水</h2>
           </div>
+          <form className="filter-bar" onSubmit={applyFilters}>
+            <label>
+              开始日期
+              <input
+                type="date"
+                value={filters.start_date}
+                onChange={(event) => updateFilters("start_date", event.target.value)}
+              />
+            </label>
+            <label>
+              结束日期
+              <input
+                type="date"
+                value={filters.end_date}
+                onChange={(event) => updateFilters("end_date", event.target.value)}
+              />
+            </label>
+            <label>
+              类型
+              <select value={filters.kind} onChange={(event) => updateFilters("kind", event.target.value)}>
+                <option value="">全部</option>
+                <option value="expense">支出</option>
+                <option value="income">收入</option>
+                <option value="transfer">转账</option>
+              </select>
+            </label>
+            <label>
+              账户
+              <select
+                value={filters.account_id}
+                onChange={(event) => updateFilters("account_id", event.target.value)}
+              >
+                <option value="">全部</option>
+                {accounts.map((account) => (
+                  <option key={account.id} value={account.id}>
+                    {account.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              分类
+              <select
+                value={filters.category_id}
+                onChange={(event) => updateFilters("category_id", event.target.value)}
+              >
+                <option value="">全部</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="filter-actions">
+              <button className="button secondary" disabled={loading} type="submit">
+                筛选
+              </button>
+              <button className="button secondary" disabled={loading} type="button" onClick={clearFilters}>
+                清除
+              </button>
+            </div>
+          </form>
           <div className="table-wrap">
             <table>
               <thead>

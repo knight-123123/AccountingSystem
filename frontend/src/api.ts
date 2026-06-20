@@ -76,6 +76,14 @@ export type TransactionPayload = {
   to_account_id?: number;
 };
 
+export type TransactionFilters = {
+  start_date?: string;
+  end_date?: string;
+  kind?: string;
+  account_id?: string;
+  category_id?: string;
+};
+
 export type AccountPayload = {
   user_id: number;
   name: string;
@@ -162,7 +170,16 @@ export const api = {
     requestNoContent(`/categories/${categoryId}`, {
       method: "DELETE",
     }),
-  transactions: () => requestJson<Transaction[]>("/transactions"),
+  transactions: (filters?: TransactionFilters) => {
+    const params = new URLSearchParams();
+    Object.entries(filters ?? {}).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, value);
+      }
+    });
+    const query = params.toString();
+    return requestJson<Transaction[]>(query ? `/transactions?${query}` : "/transactions");
+  },
   createTransaction: (payload: TransactionPayload) =>
     requestJson<Transaction>("/transactions", {
       method: "POST",

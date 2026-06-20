@@ -193,6 +193,7 @@ GET /reports/categories
 
 - `DELETE /accounts/{account_id}` 和 `DELETE /categories/{category_id}` 当前是软删除，只修改 `is_active=false`。
 - `POST /transactions` 支持 `income`、`expense`、`transfer`。
+- `GET /transactions` 支持 `start_date`、`end_date`、`kind`、`account_id`、`category_id` 查询参数。
 - `DELETE /transactions/{transaction_id}` 会删除整笔交易和对应交易明细。
 - CSV 导出是一条 `transaction_entry` 一行，转账会导出两行。
 - 报表统计中，转账不计入收入/支出。
