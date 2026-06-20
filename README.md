@@ -11,6 +11,7 @@
 - 账户、分类、交易、报表 API
 - 交易 CSV 导出
 - 开发用默认用户脚本
+- React 前端初始页面
 
 ## 本地开发
 
@@ -60,6 +61,45 @@ cd backend
 ```text
 GET http://127.0.0.1:8000/health
 ```
+
+## 启动前端
+
+前端代码在 `frontend/` 目录。首次运行需要安装依赖：
+
+```powershell
+cd frontend
+npm.cmd install
+```
+
+启动开发服务：
+
+```powershell
+npm.cmd run dev
+```
+
+默认访问：
+
+```text
+http://127.0.0.1:5173
+```
+
+前端默认请求：
+
+```text
+http://127.0.0.1:8000
+```
+
+如需调整后端地址，复制 `frontend/.env.example` 为 `frontend/.env` 后修改 `VITE_API_BASE_URL`。
+
+当前前端包含：
+
+- 新增收入、支出、转账
+- 交易流水
+- 账户余额
+- 账户管理：列表、新增、编辑、停用
+- 分类管理：列表、新增、编辑、停用
+- 月度和分类统计
+- CSV 导出
 
 ## 冒烟验证
 
@@ -158,5 +198,5 @@ GET /reports/categories
 ## 后续阶段
 
 1. 根据需要补充交易修改/删除
-2. 再开始 React + Vite 前端
+2. 整理前端交互细节和基础测试
 3. Docker 化并部署到 Debian
