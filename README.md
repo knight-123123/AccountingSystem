@@ -177,6 +177,7 @@ DELETE /categories/{category_id}
 GET  /transactions
 POST /transactions
 GET  /transactions/{transaction_id}
+DELETE /transactions/{transaction_id}
 GET  /transactions/export.csv
 ```
 
@@ -192,11 +193,11 @@ GET /reports/categories
 
 - `DELETE /accounts/{account_id}` 和 `DELETE /categories/{category_id}` 当前是软删除，只修改 `is_active=false`。
 - `POST /transactions` 支持 `income`、`expense`、`transfer`。
+- `DELETE /transactions/{transaction_id}` 会删除整笔交易和对应交易明细。
 - CSV 导出是一条 `transaction_entry` 一行，转账会导出两行。
 - 报表统计中，转账不计入收入/支出。
 
 ## 后续阶段
 
-1. 根据需要补充交易修改/删除
-2. 整理前端交互细节和基础测试
-3. Docker 化并部署到 Debian
+1. 整理前端交互细节和基础测试
+2. Docker 化并部署到 Debian

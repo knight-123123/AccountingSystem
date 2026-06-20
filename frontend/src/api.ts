@@ -168,6 +168,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+  deleteTransaction: (transactionId: number) =>
+    requestNoContent(`/transactions/${transactionId}`, {
+      method: "DELETE",
+    }),
   accountReports: () => requestJson<AccountReport[]>("/reports/accounts"),
   monthlyReports: () => requestJson<MonthlyReport[]>("/reports/monthly"),
   categoryReports: () => requestJson<CategoryReport[]>("/reports/categories"),

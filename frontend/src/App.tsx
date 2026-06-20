@@ -298,6 +298,24 @@ function App() {
     }
   }
 
+  async function deleteTransaction(transactionId: number) {
+    if (!window.confirm("确定删除这笔交易吗？")) {
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+    try {
+      await api.deleteTransaction(transactionId);
+      await loadData();
+      setMessage("交易已删除");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "交易删除失败");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <main className="app-shell">
       <section className="topbar">
@@ -645,6 +663,7 @@ function App() {
                   <th>账户</th>
                   <th>分类</th>
                   <th>金额</th>
+                  <th>操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -661,6 +680,16 @@ function App() {
                       </td>
                       <td className={Number(entry.amount) < 0 ? "negative" : "positive"}>
                         {formatMoney(entry.amount)}
+                      </td>
+                      <td>
+                        <button
+                          className="link-action danger"
+                          disabled={loading}
+                          type="button"
+                          onClick={() => deleteTransaction(transaction.id)}
+                        >
+                          删除
+                        </button>
                       </td>
                     </tr>
                   )),

@@ -108,6 +108,16 @@ def get_transaction(transaction_id: int, db: Session = Depends(get_db)) -> Trans
     return get_transaction_or_404(transaction_id, db)
 
 
+@router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_transaction(transaction_id: int, db: Session = Depends(get_db)) -> None:
+    transaction = get_transaction_or_404(transaction_id, db)
+
+    for entry in transaction.entries:
+        db.delete(entry)
+    db.delete(transaction)
+    db.commit()
+
+
 def validate_transaction_refs(payload: TransactionCreate, db: Session) -> None:
     if db.get(User, payload.user_id) is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found.")
